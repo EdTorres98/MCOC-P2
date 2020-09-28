@@ -1,5 +1,7 @@
 import numpy as np
 
+g = 9.81 #[m/s**2]
+
 class Barra(object):
     def __init__(self, ni, nj, R, t, E, ρ, σy):
         super(Barra, self).__init__()
@@ -32,5 +34,5 @@ class Barra(object):
         xj = ret.obtener_coordenada_nodal(self.nj)
         dij = xi-xj
         L=np.sqrt(np.dot(dij,dij))
-        p = self.ρ * A*L
+        p = self.ρ * A*L *g
         return p
