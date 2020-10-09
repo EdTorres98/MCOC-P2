@@ -18,7 +18,6 @@ ver_reticulado_3d(ret_D,
     zoom=180.,
     deshabilitar_ejes=True)
 
-
 #Peso propio
 ret_D.ensamblar_sistema()
 ret_D.resolver_sistema()
@@ -123,7 +122,17 @@ ver_reticulado_3d(ret_D,
 plt.title("FU caso 2: 1.2 D + 1.6 L")
 plt.show()
 
+"""
+barras_a_rediseñar = [3,4,5, 9, 10, 11]
+barras = ret.obtener_barras()
 
+for i in barras_a_rediseñar:
+	barras[i].rediseñar(1.4*f_D[i])
+	barras[i].rediseñar(1.2*f_D[i]+1.6*f_L[i])
+"""
+
+""""
 Fu = #definir
 
 ret_D.rediseñar(Fu)
+"""

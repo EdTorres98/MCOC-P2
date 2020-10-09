@@ -38,10 +38,6 @@ ret.agregar_nodo(0     , B   , 0          )
 ret.agregar_nodo(L     , B   , 0          )
 ret.agregar_nodo(2*L   , B   , 0          )
 
-
-
-
-
 #Barras
 A = (1.1*cm)**2
 r = sqrt(A/3.141593)
@@ -72,10 +68,7 @@ ret.agregar_barra(Barra(6, 2, *props))   # 17
 ret.agregar_barra(Barra(5, 1, *props))   # 18
 ret.agregar_barra(Barra(1, 7, *props))   # 19
 
-
-# ver_reticulado_3d(ret)
-
-
+#ver_reticulado_3d(ret)
 
 ret.agregar_restriccion(0, 0, 0)
 ret.agregar_restriccion(0, 1, 0)
@@ -87,25 +80,16 @@ ret.agregar_restriccion(7, 2, 0)
 
 ret.agregar_restriccion(5, 0, 0)
 
-
 ret.agregar_fuerza(4, 2, -F)
-
 
 peso = ret.calcular_peso_total()
 
 print(f"peso = {peso}")
 
-
-
-
-
-
-
 ret.ensamblar_sistema()
 ret.resolver_sistema()
 f = ret.recuperar_fuerzas()
 fu = ret.recuperar_factores_de_utilizacion(f)
-
 
 ver_reticulado_3d(ret, 
     opciones_nodos = {
@@ -113,20 +97,23 @@ ver_reticulado_3d(ret,
         "factor_amplificacion_deformada": 30.,
     },
     opciones_barras = {
-        "color_barras_por_dato": True,
-        "ver_numeros_de_barras": False,
-        "ver_dato_en_barras": True,
-        "dato": fu,
-        "color_fondo": [1,1,1,0.4]
+        #"color_barras_por_fuerza": True,
+
+        "color_barras_por_fu": True,
+        "ver_numeros_de_barras": True,
+        "ver_fuerza_en_barras": True,
+
+        #"ver_factor_utilizacion": True,
+        #"dato": fu,
+        #"color_fondo": [1,1,1,0.4]
     })
+
 
 barras_a_rediseñar = [3,4,5, 9, 10, 11]
 barras = ret.obtener_barras()
+
 for i in barras_a_rediseñar:
 	barras[i].rediseñar(f[i])
-
-
-
 
 ret.ensamblar_sistema()
 ret.resolver_sistema()
@@ -143,9 +130,13 @@ ver_reticulado_3d(ret,
         "factor_amplificacion_deformada": 30.,
     },
     opciones_barras = {
-        "color_barras_por_dato": True,
-        "ver_numeros_de_barras": False,
-        "ver_dato_en_barras": True,
-        "dato": fu1,
-        "color_fondo": [1,1,1,0.4]
+        #"color_barras_por_fuerza": True,
+
+        "color_barras_por_fu": True,
+        "ver_numeros_de_barras": True,
+        "ver_fuerza_en_barras": True,
+
+        #"ver_factor_utilizacion": True,
+        #"dato": fu,
+        #"color_fondo": [1,1,1,0.4]
     })

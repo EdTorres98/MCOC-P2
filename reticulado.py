@@ -44,20 +44,12 @@ class Reticulado(object):
 	def obtener_barras(self):
 		return self.barras
 
-
-
-
-
-
-
-
 	def agregar_restriccion(self, nodo, gdl, valor=0.0):
 
 		if nodo not in self.restricciones:
 			self.restricciones[nodo] = [[gdl, valor]]
 		else:
 			self.restricciones[nodo].append([gdl, valor])
-
 
 	def agregar_fuerza(self, nodo, gdl, valor):
 		"""
@@ -68,7 +60,6 @@ class Reticulado(object):
 			self.cargas[nodo] = [[gdl, valor]]
 		else:
 			self.cargas[nodo].append([gdl, valor])
-
 
 	def ensamblar_sistema(self):
 		
@@ -85,20 +76,18 @@ class Reticulado(object):
 
 			ni, nj = b.obtener_conectividad()
 
-
 			#MDR
-			d = [2*ni, 2*ni+1 , 2*nj, 2*nj+1]
+			if self.Ndimensiones == 2:
+				d = [2 * ni, 2 * ni +1, 2 * nj, 2 * nj + 1]
+			else:
+				d = [3 * ni, 3 * ni + 1, 3 * ni + 2, 3 * nj, 3 * nj + 1, 3 * nj + 2]
 
-			for i in range(4):
+			for i in range(self.Ndimensiones*2):
 				p = d[i]
-				for j in range(4):
+				for j in range(self.Ndimensiones*2):
 					q = d[j]
 					self.K[p,q] += ke[i,j]
 				self.f[p] = fe[i]
-
-
-
-
 
 	def resolver_sistema(self):
 
@@ -114,7 +103,7 @@ class Reticulado(object):
 				gdl = restriccion[0]
 				valor = restriccion[1]
 
-				gdl_global = 2*nodo + gdl
+				gdl_global = self.Ndimensiones * nodo + gdl
 				self.u[gdl_global] = valor
 
 				gdl_restringidos.append(gdl_global)
@@ -123,18 +112,15 @@ class Reticulado(object):
 		gdl_restringidos = np.array(gdl_restringidos)
 		gdl_libres = np.setdiff1d(gdl_libres, gdl_restringidos)
 
-
 		for nodo in self.cargas:
 			for carga in self.cargas[nodo]:
 				gdl = carga[0]
 				valor = carga[1]
 
-				gdl_global = 2*nodo + gdl
+				gdl_global = self.Ndimensiones * nodo + gdl
 				self.f[gdl_global] = valor
 
-
 		#1 Particionar:
-
 
 		Kff = self.K[np.ix_(gdl_libres, gdl_libres)]
 		Kfc = self.K[np.ix_(gdl_libres, gdl_restringidos)]
@@ -155,9 +141,16 @@ class Reticulado(object):
 		self.has_solution = True
 
 	def obtener_desplazamiento_nodal(self, n):
-		dofs = [2*n, 2*n+1]
-		return self.u[dofs]
+		if self.Ndimensiones == 2:
+			dofs = [2 * n, 2 * n +1]
 
+		elif self.Ndimensiones == 3:
+			dofs = [3 * n, 3 * n + 1, 3 * n + 2]
+
+		else:
+			print(f"Error en numero de dimensiones. Ndimensiones = {self.Ndimensiones == 2}")
+
+		return self.u[dofs]
 
 	def recuperar_fuerzas(self):
 		
@@ -181,16 +174,11 @@ class Reticulado(object):
 			b.rediseñar(Fu[i], self, ϕ)
 
 
-
-
-
-
-
-
-
-
-
-
+	def chequear_diseño(self, Fu, ϕ=0.9):
+		for i,b in enumerate(self.barras):
+			if not b.chequear_diseño(Fu[i], self, ϕ):
+				return False
+		return True
 
 	def __str__(self):
 		s = "nodos:\n"
