@@ -1,3 +1,4 @@
+
 # MCOC2020 - Proyecto 2
 # ==========================================================
 # ver_reticulado_2d
@@ -13,6 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
+
 
 
 #Opciones para nodos
@@ -32,14 +35,11 @@ opc_barras_default = {
     "color_barras" : [138/255,89/255,0/255],#8F652F
     "grosor_barras" : 2,
     "ver_numeros_de_barras" : True,
-    "color_barras_por_fuerza" : False,
-    "ver_fuerza_en_barras" : False,
-    "formato_fuerza_en_barras" : "4.2f",
-    "color_barras_por_fu": False,
-    "ver_factor_utilizacion": False,
-    "formato_factor_utilizacion": "4.2f",
-    "color_barra_compresion" : np.array([1, 0, 0]),
-    "color_barra_traccion" : np.array([0, 0, 1]),
+    "color_barras_por_dato" : False,
+    "ver_dato_en_barras" : False,
+    "formato_dato_en_barras" : "4.2f",
+    "color_barra_min" : np.array([1, 0, 0]),
+    "color_barra_max" : np.array([0, 0, 1]),
     "color_barra_cero" : np.array([0, 0, 0]),
     "color_fondo" : np.array([1, 1, 1, 0.5]),
     "usar_posicion_deformada": False,
@@ -64,7 +64,7 @@ def graficar_nodos(ret, fig,  opciones):
         else:
             u = opciones["datos_desplazamientos_nodales"]
         factor = opciones ["factor_amplificacion_deformada"]
-        uvw = ret.u.reshape((-1,3))
+        uvw = u.reshape((-1,3))
         xyz = xyz +  factor*uvw
     
     ax = fig.gca()
@@ -89,41 +89,28 @@ def graficar_barras(ret, fig, opciones):
         if key not in opciones:
             opciones[key] = opc_barras_default[key]
 
-    xyz = ret.obtener_nodos()
+    xyz = ret.obtener_nodos()[:,0:3]
 
     if opciones["usar_posicion_deformada"]: 
-        #if opciones["datos_desplazamientos_nodales"] is None:
-         #   u = ret.u
-        #else:
-         #   u = opciones["datos_desplazamientos_nodales"]
+        if opciones["datos_desplazamientos_nodales"] is None:
+            u = ret.u
+        else:
+            u = opciones["datos_desplazamientos_nodales"]
         factor = opciones ["factor_amplificacion_deformada"]
-        uvw = ret.u.reshape((-1,3))
+        uvw = u.reshape((-1,3))
         xyz = xyz +  factor*uvw
 
-    if opciones["color_barras_por_fuerza"]:
-        f = ret.recuperar_fuerzas()
-
+    if opciones["color_barras_por_dato"]:
+        f = opciones["dato"]
         fmax = f.max()
         fmin = f.min()
-        c_comp= opciones["color_barra_compresion"]
-        c_trac = opciones["color_barra_traccion"]
-        c_cero = opciones["color_barra_cero"]
-
-    if opciones["color_barras_por_fu"]:
-        f = ret.recuperar_fuerzas()
-        fu = 0*f
-        for i,b in enumerate(ret.obtener_barras()):
-            fu[i] = b.obtener_factor_utilizacion(f[i])
-
-        fmax = fu.max()
-        fmin = fu.min()
-        c_trac= opciones["color_barra_compresion"]
-        c_comp = opciones["color_barra_traccion"]
+        c_min = opciones["color_barra_min"]
+        c_max = opciones["color_barra_max"]
         c_cero = opciones["color_barra_cero"]
 
     c = opciones["color_barras"]
-    fmt = opciones["formato_fuerza_en_barras"] #----------
-    txt_case = int(opciones["ver_numeros_de_barras"]) + 2*int(opciones["ver_fuerza_en_barras"]) #-------------
+    fmt = opciones["formato_dato_en_barras"]
+    txt_case = int(opciones["ver_numeros_de_barras"]) + 2*int(opciones["ver_dato_en_barras"])
     
     for i,b in enumerate(ret.obtener_barras()):
         nodos = b.obtener_conectividad()
@@ -131,14 +118,13 @@ def graficar_barras(ret, fig, opciones):
         y =  xyz[nodos,1]
         z =  xyz[nodos,2]
 
-        if opciones["color_barras_por_fuerza"] or \
-            opciones["color_barras_por_fu"] :
-            if fu[i] < 0:
-                xi = 1-(fu[i]-fmin)/(0 - fmin)
-                c = xi*c_comp + (1-xi)*c_cero
+        if opciones["color_barras_por_dato"]:
+            if f[i] < 0:
+                xi = 1-(f[i]-fmin)/(0 - fmin)
+                c = xi*c_min + (1-xi)*c_cero
             else:
-                xi = 1-(fmax - fu[i])/(fmax - 0)
-                c = xi*c_trac + (1-xi)*c_cero
+                xi = 1-(fmax - f[i])/(fmax - 0)
+                c = xi*c_max + (1-xi)*c_cero
 
         ax.plot(x,y,z,
             linestyle=opciones["estilo_barras"],
@@ -154,9 +140,9 @@ def graficar_barras(ret, fig, opciones):
             if txt_case == 1:
                 txt = f"{i}"
             elif txt_case == 2:
-                txt = ("{0:"+fmt+"}").format(fu[i])
+                txt = ("{0:"+fmt+"}").format(f[i])
             else:
-                txt = ("{0} : {1:"+fmt+"}").format(i,fu[i])
+                txt = ("{0} : {1:"+fmt+"}").format(i,f[i])
             ax.text(x0, y0, z0, txt , 
                 color=c, 
                 rotation=th,
