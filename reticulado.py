@@ -44,12 +44,20 @@ class Reticulado(object):
 	def obtener_barras(self):
 		return self.barras
 
+
+
+
+
+
+
+
 	def agregar_restriccion(self, nodo, gdl, valor=0.0):
 
 		if nodo not in self.restricciones:
 			self.restricciones[nodo] = [[gdl, valor]]
 		else:
 			self.restricciones[nodo].append([gdl, valor])
+
 
 	def agregar_fuerza(self, nodo, gdl, valor):
 		"""
@@ -60,6 +68,7 @@ class Reticulado(object):
 			self.cargas[nodo] = [[gdl, valor]]
 		else:
 			self.cargas[nodo].append([gdl, valor])
+
 
 	def ensamblar_sistema(self):
 		
@@ -76,11 +85,12 @@ class Reticulado(object):
 
 			ni, nj = b.obtener_conectividad()
 
+
 			#MDR
 			if self.Ndimensiones == 2:
-				d = [2 * ni, 2 * ni +1, 2 * nj, 2 * nj + 1]
+				d = [2*ni, 2*ni+1, 2*nj,2*nj+1]
 			else:
-				d = [3 * ni, 3 * ni + 1, 3 * ni + 2, 3 * nj, 3 * nj + 1, 3 * nj + 2]
+				d = [3*ni, 3*ni+1 ,3*ni+2, 3*nj, 3*nj+1,3*nj+2]
 
 			for i in range(self.Ndimensiones*2):
 				p = d[i]
@@ -88,6 +98,10 @@ class Reticulado(object):
 					q = d[j]
 					self.K[p,q] += ke[i,j]
 				self.f[p] = fe[i]
+
+
+
+
 
 	def resolver_sistema(self):
 
@@ -103,7 +117,7 @@ class Reticulado(object):
 				gdl = restriccion[0]
 				valor = restriccion[1]
 
-				gdl_global = self.Ndimensiones * nodo + gdl
+				gdl_global = self.Ndimensiones*nodo + gdl
 				self.u[gdl_global] = valor
 
 				gdl_restringidos.append(gdl_global)
@@ -112,15 +126,18 @@ class Reticulado(object):
 		gdl_restringidos = np.array(gdl_restringidos)
 		gdl_libres = np.setdiff1d(gdl_libres, gdl_restringidos)
 
+
 		for nodo in self.cargas:
 			for carga in self.cargas[nodo]:
 				gdl = carga[0]
 				valor = carga[1]
 
-				gdl_global = self.Ndimensiones * nodo + gdl
+				gdl_global = self.Ndimensiones*nodo + gdl
 				self.f[gdl_global] = valor
 
+
 		#1 Particionar:
+
 
 		Kff = self.K[np.ix_(gdl_libres, gdl_libres)]
 		Kfc = self.K[np.ix_(gdl_libres, gdl_restringidos)]
@@ -142,15 +159,13 @@ class Reticulado(object):
 
 	def obtener_desplazamiento_nodal(self, n):
 		if self.Ndimensiones == 2:
-			dofs = [2 * n, 2 * n +1]
-
+			dofs = [2*n, 2*n+1]
 		elif self.Ndimensiones == 3:
-			dofs = [3 * n, 3 * n + 1, 3 * n + 2]
-
+			dofs = [3*n, 3*n+1,3*n+2]
 		else:
-			print(f"Error en numero de dimensiones. Ndimensiones = {self.Ndimensiones == 2}")
-
+			print(f"Error en número de dimensiones. Ndim = {self.Ndimensiones}")
 		return self.u[dofs]
+
 
 	def recuperar_fuerzas(self):
 		
@@ -162,23 +177,41 @@ class Reticulado(object):
 
 
 	def recuperar_factores_de_utilizacion(self, f):
-		
 		FU = np.zeros((len(self.barras)), dtype=np.double)
 		for i,b in enumerate(self.barras):
 			FU[i] = b.obtener_factor_utilizacion(f[i])
-
 		return FU
 
-	def rediseñar(self, Fu, ϕ=0.9):
-		for i,b in enumerate(self.barras):
-			b.rediseñar(Fu[i], self, ϕ)
+	def rediseñar(self, Fu, φ=0.9):
+		Faux = Fu.copy()
+		barraR=[]
+		Fbarra=[]
+		FUbarra=[]
+		indexmax=0
+		Fmax=0
+		barras=self.obtener_barras()
+#--------------ELEGIR 5 BARRAS QUE TENGAN LA MAYOR FUERZA-----------------#
+		for s in range(5):
+			for i,c in enumerate(Faux):
+				if (abs(c) > Fmax):
+					indexmax = i
+					Fmax = abs(c)
+			Fbarra.append(Fmax)
+			barraR.append(indexmax)
+			Faux[indexmax]=0
+			indexmax = 0
+			Fmax=0
+		print(Fu)
+		print(f"rediseñar barras: {barraR}")
+		print(f"Fuezas  barras a rediseñar: {Fbarra}")
+		for n in barraR:
+			print(f"Nueva Barra {n}")
+			print(f"fuerza {Fu[n]}")
+			self.obtener_barras()[n].rediseñar(Fu[n],self)
+		return print(f"rediseñada barras: {barraR}")
+		return print(f"rediseñada barras: {barraR}")
 
 
-	def chequear_diseño(self, Fu, ϕ=0.9):
-		for i,b in enumerate(self.barras):
-			if not b.chequear_diseño(Fu[i], self, ϕ):
-				return False
-		return True
 
 	def __str__(self):
 		s = "nodos:\n"

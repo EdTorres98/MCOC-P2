@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 13 09:22:57 2020
+
+@author: Felipe Bravo
+"""
+
 from reticulado import Reticulado
 from barra import Barra
 from graficar3d import ver_reticulado_3d
@@ -45,7 +52,7 @@ ret.agregar_nodo(2*L   , B   , 0                )
 
 #Barras
 A = (1.1*cm)**2
-r = np.sqrt(A/3.141593)
+r = np.sqrt(A/np.pi)
 props = [r, r, 200*GPa, 7600*kg/m**3, 420*MPa]
 
 props2 = [r, r, 200*GPa, 7600*kg/m**3, 420*MPa]
@@ -62,6 +69,7 @@ ret.agregar_barra(Barra(4, 2, *props))   # 6
 ret.agregar_barra(Barra(5, 6, *props))   # 7
 ret.agregar_barra(Barra(6, 7, *props))   # 8
 ret.agregar_barra(Barra(5, 3, *props2))   # 9
+
 ret.agregar_barra(Barra(3, 6, *props2))   # 10
 ret.agregar_barra(Barra(6, 4, *props2))   # 11
 ret.agregar_barra(Barra(4, 7, *props))   # 12
@@ -70,11 +78,11 @@ ret.agregar_barra(Barra(1, 6, *props))   # 14
 ret.agregar_barra(Barra(2, 7, *props))   # 15
 ret.agregar_barra(Barra(0, 6, *props))   # 16
 ret.agregar_barra(Barra(6, 2, *props))   # 17
-ret.agregar_barra(Barra(5, 1, *props))   # 18
-ret.agregar_barra(Barra(1, 7, *props))   # 19
+#ret.agregar_barra(Barra(5, 1, *props))   # 18
+#ret.agregar_barra(Barra(1, 7, *props))   # 19
 
 
-#ver_reticulado_3d(ret)
+ver_reticulado_3d(ret)
 
 
 
